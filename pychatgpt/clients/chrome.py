@@ -22,7 +22,7 @@ class Chrome:
     @utils.retry(lambda x: x is False,
                  retries=3,
                  retry=tenacity.retry_if_result)
-    def start(self, url, proxy=None, timeout=60):
+    def start(self, url, proxy=None, timeout=30):
         driver = None
         try:
             LOG.info(f"Starting Chrome, url: {url}, proxy: {proxy}")
@@ -36,7 +36,7 @@ class Chrome:
             driver.add_cdp_listener(
                 "Network.requestWillBeSentExtraInfo",
                 self.on_request_will_be_sent)
-            driver.get("https://chat.openai.com/chat")
+            driver.get(url)
             while timeout:
                 if self.is_ready():
                     return True

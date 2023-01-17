@@ -4,3 +4,7 @@ class PyChatGPTException(Exception):
 
 class BadSession(PyChatGPTException):
     pass
+
+
+class BadResponse(PyChatGPTException):
+    pass

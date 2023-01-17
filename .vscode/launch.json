@@ -5,10 +5,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "chatgpt",
+      "name": "chatgpt api",
       "type": "python",
       "request": "launch",
-      "program": "${workspaceFolder}/pychatgpt/cmds/chatgpt.py",
+      "program": "${workspaceFolder}/pychatgpt/cmds/api.py",
       "console": "integratedTerminal",
       "justMyCode": false,
       "args": [

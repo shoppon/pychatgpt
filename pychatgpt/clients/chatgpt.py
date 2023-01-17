@@ -1,5 +1,7 @@
+import json
 import re
 import tls_client
+import uuid
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -103,3 +105,76 @@ class ChatgptClient:
             "Accept-Language": "en-US,en;q=0.9",
             "Referer": "https://chat.openai.com/chat",
         })
+
+    @utils.retry(exception.BadResponse, retries=3)
+    def _request(self, url, method, data=None, timeout_seconds=180, raw=False):
+        if method == "GET":
+            response = self.session.get(url, timeout_seconds=timeout_seconds)
+        elif method == "POST":
+            response = self.session.post(url, data=data,
+                                         timeout_seconds=timeout_seconds)
+        else:
+            raise NotImplementedError(f"Method {method} not implemented!")
+
+        # check response
+        if response.status_code != 200:
+            raise exception.BadResponse(f"Bad resp: {response.status_code}!")
+        return response.text if raw else json.loads(response.text)
+
+    def get_msg_history(self, id):
+        url = f"{BASE_URL}backend-api/conversation/{id}"
+        return self._request(url, "GET")
+
+    def get_conversations(self, offset=0, limit=20):
+        LOG.info(f"Getting conversations from {offset} to {offset + limit}")
+        url = (f"{BASE_URL}backend-api/conversations?"
+               f"offset={offset}&limit={limit}")
+        response = self._request(url, "GET")
+        return response['items']
+
+    def gen_title(self, id, message_id):
+        url = f"{BASE_URL}backend-api/conversation/gen_title/{id}"
+        body = {"message_id": message_id, "model": "text-davinci-002-render"}
+        return self._request(url, "POST", data=json.dumps(body))
+
+    def ask(self, prompt, conversation_id=None, parent_id=None):
+        self.refresh_session()
+        data = {
+            "action": "next",
+            "messages": [
+                {
+                    "id": str(uuid.uuid4()),
+                    "role": "user",
+                    "content": {"content_type": "text", "parts": [prompt]},
+                },
+            ],
+            "conversation_id": conversation_id,
+            "parent_message_id": parent_id or str(uuid.uuid4()),
+            "model": "text-davinci-002-render",
+        }
+        response = self._request(
+            url=BASE_URL + "backend-api/conversation",
+            method="POST",
+            data=json.dumps(data),
+            raw=True,
+            timeout_seconds=180
+        )
+        try:
+            response = response.text.splitlines()[-4]
+            response = response[6:]
+        except Exception:
+            raise exception.BadResponse("Bad response from OpenAI!")
+
+        # Check if it is JSON
+        if not response.startswith("{"):
+            raise exception.BadResponse(f"Unexpected response {response}!")
+
+        response = json.loads(response)
+        parent_id = response["message"]["id"]
+        conversation_id = response["conversation_id"]
+        message = response["message"]["content"]["parts"][0]
+        return {
+            "message": message,
+            "conversation_id": conversation_id,
+            "parent_id": parent_id,
+        }

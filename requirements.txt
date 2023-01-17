@@ -1,6 +1,8 @@
+fastapi
 oslo.config
 oslo.log
 selenium
 tenacity
 tls_client
 undetected_chromedriver
+uvicorn

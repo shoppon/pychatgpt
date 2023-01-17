@@ -1,6 +1,7 @@
 fastapi
 oslo.config
 oslo.log
+requests
 selenium
 tenacity
 tls_client

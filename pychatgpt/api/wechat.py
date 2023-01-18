@@ -1,7 +1,8 @@
+import asyncio
 from contextlib import contextmanager
 
 from pychatgpt.api import app
-from pychatgpt.clients import wechat
+from pychatgpt.clients.wechat import WechatClient
 from pychatgpt.exception import PyChatGPTException
 
 APP_ID = "wx782c26e4c19acffb"
@@ -13,7 +14,7 @@ def ensure_wechat():
     try:
         global wc
         if wc is None:
-            wc = wechat.WechatClient(APP_ID, "zh_CN")
+            wc = WechatClient(APP_ID, "zh_CN")
         yield wc
     finally:
         if wc is None:
@@ -23,5 +24,12 @@ def ensure_wechat():
 @app.get("/wechat/uuid")
 def get_uuid():
     with ensure_wechat() as wc:
-        resp = wc.get_login_uuid()
-        return resp
+        uuid = wc.get_login_uuid()
+        uri = wc.wait_for_login(uuid)
+        request, cred = wc.login(uri)
+        session = wc.webwx_init(uri, request, cred)
+        wc.webwx_status_notify(uri, request, session, cred)
+        contacts = wc.read_contacts(uri, request, cred)
+        wc.read_batch_contacts(contacts, uri, request, cred)
+        asyncio.run(wc.listen(request, session))
+        return uuid

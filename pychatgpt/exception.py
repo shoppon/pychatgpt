@@ -8,3 +8,7 @@ class BadSession(PyChatGPTException):
 
 class BadResponse(PyChatGPTException):
     pass
+
+
+class NoHostAvailable(PyChatGPTException):
+    pass

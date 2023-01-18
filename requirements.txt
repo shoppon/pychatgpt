@@ -1,4 +1,5 @@
 fastapi
+qrcode
 oslo.config
 oslo.log
 requests

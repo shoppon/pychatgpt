@@ -9,6 +9,8 @@ from pychatgpt.api import bot  # noqa
 from pychatgpt.api import wechat  # noqa
 
 CONF = config.CONF
+logging.register_options(CONF)
+logging.setup(CONF, "chatgpt")
 LOG = logging.getLogger(__name__)
 
 if __name__ == "__main__":

@@ -35,7 +35,9 @@ class Credential:
 @attr.s
 class Session:
     user = attr.ib(type=dict)
-    sync_key = attr.ib(type=str)
+    cookies = attr.ib()
+    sync_key_origin = attr.ib(type=list)
+    sync_key_parsed = attr.ib(type=str)
 
 
 @attr.s

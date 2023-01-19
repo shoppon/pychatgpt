@@ -25,7 +25,7 @@ def ensure_wechat():
 def get_uuid():
     with ensure_wechat() as wc:
         uuid = wc.get_login_uuid()
-        uri = wc.wait_for_login(uuid)
+        uri = wc.wait_for_login(uuid, tip=0)
         request, cred = wc.login(uri)
         session = wc.webwx_init(uri, request, cred)
         wc.webwx_status_notify(uri, request, session, cred)

@@ -1,9 +1,10 @@
 import asyncio
-import re
-import qrcode
 import json
+import qrcode
+import re
 import requests
 import time
+import urllib
 import xml
 from urllib.parse import urlencode
 
@@ -30,32 +31,40 @@ class WechatClient:
 
     @utils.retry(exception.BadResponse, retries=3)
     def _request(self, method: str, url: str,
-                 form: dict = None,
-                 body: dict = None,
-                 headers: dict = None) -> requests.Response:
+                 params: dict = None,  # query string
+                 form: dict = None,  # form data
+                 body: dict = None,  # json body
+                 headers: dict = None,
+                 cookies: dict = None,
+                 ) -> requests.Response:
         headers = headers or {}
+
         if method == 'POST':
             headers['Content-Type'] = 'application/json; charset=UTF-8'
 
         if method == 'GET':
             headers['Referer'] = 'https://wx.qq.com/'
 
-        params = None
+        content = None
         if form is not None:
             headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
-            params = form
+            content = form
         elif body is not None:
             headers['Content-Type'] = 'application/json; charset=UTF-8'
-            params = json.dumps(body).encode()
+            content = json.dumps(body).encode()
 
-        LOG.info(f"Request: {method}, {url}, data: {params}, "
-                 f"headers, {headers}")
+        LOG.info(f"Request: {method}, {url}, params: {params}, "
+                 f"data: {content}, headers, {headers}")
         resp = requests.request(method, url,
-                                data=params,
+                                params=params,
+                                data=content,
+                                cookies=cookies,
                                 headers=headers)
+        LOG.debug(f"Response: {resp.status_code}, {resp.text}")
         if resp.status_code != 200:
             raise exception.BadResponse(f"Bad response: {resp.status_code}")
         return resp
+
 
     def get_login_uuid(self):
         url = 'https://login.wx2.qq.com/jslogin'
@@ -143,7 +152,7 @@ class WechatClient:
         if not all((skey, sid, uin, pass_ticket)):
             raise exception.BadResponse(f"Bad response: {resp}")
 
-        return Request(skey=skey, sid=sid, uin=uin), Credential(pass_ticket)
+        return Request(skey=skey, sid=sid, uin=int(uin)), Credential(pass_ticket)
 
     def webwx_init(self, uri: Uri, request: Request, credential: Credential):
         LOG.info(f'Webwx init, uri: {uri}, request: {request}, '
@@ -154,16 +163,21 @@ class WechatClient:
         body = {
             'BaseRequest': request.to_dict(),
         }
-        resp = json.loads(self._request('POST', url, body=body).text)
-        if resp['BaseResponse']['Ret'] != 0:
-            raise exception.BadResponse(f"Bad response: {resp}")
+        resp = self._request('POST', url, body=body)
+        content = json.loads(resp.text)
+        if content['BaseResponse']['Ret'] != 0:
+            raise exception.BadResponse(f"Bad response: {content}")
 
-        sync_key = resp['SyncKey']
-        user = resp['User']
-        sync_key = '|'.join([str(kv['Key']) + '_' + str(kv['Val'])
-                             for kv in sync_key['List']])
+        user = content['User']
+        sync_key_origin = content['SyncKey']
+        sync_key_parsed = '|'.join([str(kv['Key']) + '_' + str(kv['Val'])
+                                    for kv in sync_key_origin['List']])
 
-        return Session(sync_key=sync_key, user=user)
+        return Session(user=user,
+                       cookies=resp.cookies,
+                       sync_key_origin=sync_key_origin,
+                       sync_key_parsed=sync_key_parsed,
+                       )
 
     def webwx_status_notify(self, uri: Uri, request: Request,
                             session: Session,
@@ -183,11 +197,14 @@ class WechatClient:
 
     def read_contacts(self, uri: Uri, request: Request,
                       credential: Credential):
-        LOG.info(f'Read contact, uri: {uri}, request: {request}.')
+        LOG.info(f'Read contacts, uri: {uri}, request: {request}.')
         now = int(time.time())
         url = (f'{uri.base_uri}/webwxgetcontact?pass_ticket='
                f'{credential.pass_ticket}&skey={request.skey}&r={now}')
-        resp = json.loads(self._request('POST', url, body={}).text)
+        body = {
+            'BaseRequest': request.to_dict(),
+        }
+        resp = json.loads(self._request('POST', url, body=body).text)
         if resp['BaseResponse']['Ret'] != 0:
             raise exception.BadResponse(f"Bad response: {resp}")
 
@@ -223,11 +240,12 @@ class WechatClient:
             'uin': request.uin,
             'skey': request.skey,
             'deviceid': request.device_id,
-            'synckey': session.sync_key,
+            'synckey': session.sync_key_parsed,
             '_': int(time.time()),
         }
-        url = f'https://{host}/cgi-bin/mmwebwx-bin/synccheck?{urlencode(params)}'
-        resp = self._request('GET', url).text
+        url = f'https://{host}/cgi-bin/mmwebwx-bin/synccheck'
+        resp = self._request('GET', url, params=params,
+                             cookies=session.cookies).text
         match_obj = re.search(
             r'window.synccheck={retcode:"(\d+)",selector:"(\d+)"}', resp)
         retcode = match_obj.group(1)
@@ -235,15 +253,14 @@ class WechatClient:
         return retcode, selector
 
     def select_host(self, request: Request, session: Session):
-        hosts = ['wx2.qq.com',
+        hosts = ['wx.qq.com',
+                 'wx2.qq.com',
                  'webpush.wx2.qq.com',
                  'wx8.qq.com',
                  'webpush.wx8.qq.com',
-                 'qq.com',
                  'webpush.wx.qq.com',
                  'web2.wechat.com',
                  'webpush.web2.wechat.com',
-                 'wechat.com',
                  'webpush.web.wechat.com',
                  'webpush.weixin.qq.com',
                  'webpush.wechat.com',
@@ -254,13 +271,14 @@ class WechatClient:
         for host in hosts:
             try:
                 retcode, _ = self.sync_check(host, request, session)
+                LOG.info(f'Check host {host}, retcode: {retcode}')
                 if retcode == '0':
                     return host
             except Exception:
                 LOG.error(f'Check host {host} error')
         raise exception.NoHostAvailable('No host available')
 
-    async def listen(self, request: Request, session: Session):
+    def listen(self, request: Request, session: Session):
         host = self.select_host(request, session)
         while True:
             retcode, selector = self.sync_check(host, request, session)
@@ -284,14 +302,14 @@ class WechatClient:
             elif selector == '7':
                 r = self.webwx_sync()
 
-            await asyncio.sleep(1)
+            # await asyncio.sleep(1)
 
     def webwx_sync(self, uri: Uri, request: Request, session: Session):
         url = (f'{uri.base_uri}/webwxsync?sid={request.sid}&skey={request.skey}'
                f'&pass_ticket={session.pass_ticket}')
         body = {
             'BaseRequest': request.to_dict(),
-            'SyncKey': session.sync_key,
+            'SyncKey': session.sync_key_origin,
             'rr': ~int(time.time())
         }
         resp = self._request('POST', url, body=body).json()
@@ -299,8 +317,9 @@ class WechatClient:
             LOG.warning('Sync error')
             return None
 
-        session.sync_key = '|'.join([str(kv['Key']) + '_' + str(kv['Val'])
-                                     for kv in resp['SyncKey']['List']])
+        session.sync_key_origin = resp['SyncKey']
+        session.sync_key_parsed = '|'.join([str(kv['Key']) + '_' + str(kv['Val'])
+                                            for kv in resp['SyncKey']['List']])
         return resp
 
     def handle_msg(self, r):

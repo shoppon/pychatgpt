@@ -404,7 +404,8 @@ class WechatClient:
                 # group message
                 if content.startswith('@'):
                     group_userid, content = content.split('<br/>', 1)
-                    group_username = self.parse_username(group_userid,
+                    # group_userid like @f7a8c1e1:
+                    group_username = self.parse_username(group_userid[:-1],
                                                          contacts, uri,
                                                          request,
                                                          credentials)

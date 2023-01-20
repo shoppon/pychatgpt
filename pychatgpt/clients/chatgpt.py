@@ -156,7 +156,7 @@ class ChatgptClient:
             "parent_message_id": parent_id or str(uuid.uuid4()),
             "model": "text-davinci-002-render",
         }
-        response = self._request(
+        response_text = self._request(
             url=BASE_URL + "backend-api/conversation",
             method="POST",
             data=json.dumps(data),
@@ -164,7 +164,7 @@ class ChatgptClient:
             timeout_seconds=180
         )
         try:
-            response = response.text.splitlines()[-4]
+            response = response_text.splitlines()[-4]
             response = response[6:]
         except Exception:
             raise exception.BadResponse(f"Bad response: {response}!")

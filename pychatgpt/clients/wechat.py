@@ -49,6 +49,9 @@ class WechatClient:
                  cookies: dict = None,
                  ) -> Response:
         headers = headers or {}
+        headers['User-Agent'] = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
+                                 'AppleWebKit/537.36 (KHTML, like Gecko) '
+                                 'Chrome/108.0.0.0 Safari/537.36')
 
         if method == 'POST':
             headers['Content-Type'] = 'application/json; charset=UTF-8'
@@ -404,7 +407,7 @@ class WechatClient:
                 # group message
                 if content.startswith('@'):
                     content = content.split('<br/>', 1)[1]
-                    LOG.info(f'Receive text from {from_username}/{to_username}, ',
+                    LOG.info(f'Receive text from {from_username}/{to_username}, '
                              f'content: {content}')
                 else:
                     LOG.info(f'Receive text from {from_username}, '
@@ -413,11 +416,11 @@ class WechatClient:
                     if not content.startswith('#ai '):
                         continue
 
-                    # with bot.ensure_chatgpt() as chatgpt:
-                        # reply = chatgpt.ask(content[3:])
-                    self.send_message(content, from_username,
-                                      uri, request,
-                                      session, credentials)
+                    with bot.ensure_chatgpt() as chatgpt:
+                        reply = chatgpt.ask(content[3:])
+                        self.send_message(reply, from_username,
+                                          uri, request,
+                                          session, credentials)
                 except Exception as err:
                     LOG.error(f'Chatgpt error: {err}')
             # image

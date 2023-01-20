@@ -42,5 +42,25 @@ class Session:
 
 @attr.s
 class Contacts:
-    publics = attr.ib(type=list)
-    groups = attr.ib(type=list)
+    publics = attr.ib(type=dict, default={})  # userid: contact
+    groups = attr.ib(type=dict, default={})
+    friends = attr.ib(type=dict, default={})
+
+    def get_username(self, userid):
+        for contact in self.publics.values():
+            if contact['UserName'] == userid:
+                return contact['NickName']
+        for contact in self.groups.values():
+            if contact['UserName'] == userid:
+                return contact['NickName']
+        for contact in self.friends.values():
+            if contact['UserName'] == userid:
+                return contact['NickName']
+        return userid
+
+    def get_group_username(self, userid):
+        for group in self.groups.values():
+            for member in group['MemberList']:
+                if member['UserName'] == userid:
+                    return member['NickName']
+        return userid

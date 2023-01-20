@@ -86,7 +86,7 @@ class ChatgptClient:
                     "__Secure-next-auth.session-token", self.session_token)
                 LOG.info(f"Session token: {self.session_token}")
         except KeyError:
-            LOG.warning(f"Failed to detect cookies! Message: {message}")
+            LOG.warning(f"Failed to detect cookies!")
 
     def _refresh_headers(self, user_agent, cf_clearance):
         if not cf_clearance or not user_agent:

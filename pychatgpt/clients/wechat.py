@@ -470,7 +470,7 @@ class WechatClient:
         try:
             with bot.ensure_chatgpt() as chatgpt:
                 reply = chatgpt.ask(content)
-                callback(reply)
+                callback(reply['message'])
         except Exception as err:
             LOG.error(f'Chatgpt error: {err}')
 

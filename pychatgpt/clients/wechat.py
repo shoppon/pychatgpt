@@ -226,12 +226,13 @@ class WechatClient:
 
         contacts = Contacts()
         for member in decoded['MemberList']:
+            user_id = member['UserName']
             if member['VerifyFlag'] & 8 != 0:
-                contacts.publics['UserName'] = member
-            elif "@@" in member['UserName']:
-                contacts.groups['UserName'] = member
+                contacts.publics[user_id] = member
+            elif "@@" in user_id:
+                contacts.groups[user_id] = member
             else:
-                contacts.friends['UserName'] = member
+                contacts.friends[user_id] = member
         return contacts
 
     def read_batch_contacts(self, contacts: Contacts, uri: Uri,
@@ -415,15 +416,23 @@ class WechatClient:
                              f'content: {content}')
                 else:
                     LOG.info(f'Receive text from {from_username} '
-                             f'to: {to_username}, '
+                             f'to {to_username}, '
                              f'content: {content}')
                 try:
+                    me = session.user['UserName']
+                    to = from_userid if to_userid == me else to_userid
+                    if content.startswith('#hc '):
+                        self.send_message(content[4:],
+                                          to=to,
+                                          uri=uri, request=request,
+                                          session=session,
+                                          credentials=credentials)
+                        continue
+
                     if not content.startswith('#ai '):
                         continue
 
                     # asyncronous reply
-                    me = session.user['UserName']
-                    to = from_userid if to_userid == me else to_userid
                     reply_fn = partial(self.send_message,
                                        to=to,
                                        uri=uri, request=request,

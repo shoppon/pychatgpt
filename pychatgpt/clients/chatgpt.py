@@ -45,9 +45,12 @@ class ChatgptClient:
 
     @utils.retry(exception.BadSession, retries=10)
     def refresh_session(self):
+        LOG.info("Refreshing session...")
         url = BASE_URL + "api/auth/session"
         response = self.session.get(url, timeout_seconds=180)
         if response.status_code != 200:
+            LOG.info(f'Failed to refresh session, '
+                     f'status code: {response.status_code}.')
             self.startup()
             raise exception.BadSession(f"Bad resp: {response.status_code}!")
 
@@ -108,6 +111,7 @@ class ChatgptClient:
 
     @utils.retry(exception.BadResponse, retries=3)
     def _request(self, url, method, data=None, timeout_seconds=180, raw=False):
+        LOG.info(f"Requesting {method} {url}, data: {data}.")
         if method == "GET":
             response = self.session.get(url, timeout_seconds=timeout_seconds)
         elif method == "POST":

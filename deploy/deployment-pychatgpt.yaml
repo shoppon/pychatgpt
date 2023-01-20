@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pychatgpt
+  namespace: pychatgpt
+spec:
+  selector:
+    matchLabels:
+      application: pychatgpt
+      component: pychatgpt
+  template:
+    metadata:
+      labels:
+        application: pychatgpt
+        component: pychatgpt
+    spec:
+      containers:
+        - image: shoppon/pychatgpt:latest
+          name: pychatgpt
+          # command: ["/bin/bash", "-c", "--"]
+          # args: ["while true; do sleep 30; done;"]
+          command: ["/usr/bin/start.sh"]
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+            requests:
+              cpu: 2000m
+              memory: 2Gi
+          volumeMounts:
+            - name: pychatgpt-etc
+              mountPath: /etc/pychatgpt/pychatgpt.conf
+              subPath: pychatgpt.conf
+              readOnly: true
+            - name: pychatgpt-bin
+              mountPath: /usr/bin/start.sh
+              subPath: start.sh
+      volumes:
+        - name: pychatgpt-etc
+          configMap:
+            name: pychatgpt-etc
+        - name: pychatgpt-bin
+          configMap:
+            name: pychatgpt-bin

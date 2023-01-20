@@ -37,7 +37,6 @@ class Chrome:
                 "Network.requestWillBeSentExtraInfo",
                 self.on_request_will_be_sent)
             driver.get(url)
-            cookies = driver.get_cookies()
             while timeout:
                 if self.is_ready():
                     return True

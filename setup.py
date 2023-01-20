@@ -7,10 +7,9 @@ setup(
     license="MIT",
     author="Shoppon",
     author_email="shopppon@gmail.com",
-    description="Pychatgpt is a python package for chatting with GPT-3.",
-    packages=find_packages("src"),
-    package_dir={"": "src"},
-    py_modules=["revChatGPT", "GPTserver"],
+    description="Pychatgpt is a python package for chatting with ChatGPT.",
+    packages=find_packages("."),
+    package_dir={"": "."},
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     entry_points={

@@ -5,6 +5,7 @@ import random
 import re
 import time
 import xml
+from functools import partial
 from requests import Session as RequestsSession
 from requests import Response
 
@@ -345,7 +346,7 @@ class WechatClient:
                 await asyncio.sleep(1)
         except Exception as err:
             self.working = False
-            LOG.error(f'Listen error: {err}')
+            LOG.exception(f'Listen error: {err}')
 
     def webwx_sync(self, uri: Uri, request: Request, session: Session,
                    credentials: Credential):
@@ -395,19 +396,18 @@ class WechatClient:
             from_username = self.parse_username(from_userid, contacts,
                                                 uri, request, credentials)
 
-            to_userid = msg['ToUserName']
-            to_username = self.parse_username(to_userid,
-                                              contacts, uri, request,
-                                              credentials)
-
             content = msg['Content'].replace('&lt;', '<').replace('&gt;', '>')
 
             # text message
             if msg_type == 1:
                 # group message
                 if content.startswith('@'):
-                    content = content.split('<br/>', 1)[1]
-                    LOG.info(f'Receive text from {from_username}/{to_username}, '
+                    group_userid, content = content.split('<br/>', 1)
+                    group_username = self.parse_username(group_userid,
+                                                         contacts, uri,
+                                                         request,
+                                                         credentials)
+                    LOG.info(f'Receive text from {from_username}/{group_username}, '
                              f'content: {content}')
                 else:
                     LOG.info(f'Receive text from {from_username}, '
@@ -416,11 +416,13 @@ class WechatClient:
                     if not content.startswith('#ai '):
                         continue
 
-                    with bot.ensure_chatgpt() as chatgpt:
-                        reply = chatgpt.ask(content[3:])
-                        self.send_message(reply, from_username,
-                                          uri, request,
-                                          session, credentials)
+                    # asyncronous reply
+                    reply_fn = partial(self.send_message,
+                                    to=from_username,
+                                    uri=uri, request=request,
+                                    session=session,
+                                    credentials=credentials)
+                    asyncio.create_task(self.chatgpt_reply(content, reply_fn))
                 except Exception as err:
                     LOG.error(f'Chatgpt error: {err}')
             # image
@@ -446,6 +448,14 @@ class WechatClient:
                 pass
             elif msg_type == 10002:
                 pass
+
+    async def chatgpt_reply(self, content, callback: callable):
+        try:
+            with bot.ensure_chatgpt() as chatgpt:
+                reply = chatgpt.ask(content)
+                callback(reply)
+        except Exception as err:
+            LOG.error(f'Chatgpt error: {err}')
 
     def send_message(self, content, to,
                      uri: Uri,

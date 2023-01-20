@@ -47,13 +47,13 @@ class Contacts:
     friends = attr.ib(type=dict, default={})
 
     def get_username(self, userid):
+        for contact in self.friends.values():
+            if contact['UserName'] == userid:
+                return contact['NickName']
         for contact in self.publics.values():
             if contact['UserName'] == userid:
                 return contact['NickName']
         for contact in self.groups.values():
-            if contact['UserName'] == userid:
-                return contact['NickName']
-        for contact in self.friends.values():
             if contact['UserName'] == userid:
                 return contact['NickName']
         return userid

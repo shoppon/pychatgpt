@@ -396,6 +396,9 @@ class WechatClient:
             from_userid = msg['FromUserName']
             from_username = self.parse_username(from_userid, contacts,
                                                 uri, request, credentials)
+            to_userid = msg['ToUserName']
+            to_username = self.parse_username(to_userid, contacts,
+                                              uri, request, credentials)
 
             content = msg['Content'].replace('&lt;', '<').replace('&gt;', '>')
 
@@ -403,28 +406,31 @@ class WechatClient:
             if msg_type == 1:
                 # group message
                 if content.startswith('@'):
-                    group_userid, content = content.split('<br/>', 1)
-                    # group_userid like @f7a8c1e1:
-                    group_username = self.parse_username(group_userid[:-1],
+                    group_userid, content = content.split(':<br/>', 1)
+                    group_username = self.parse_username(group_userid,
                                                          contacts, uri,
                                                          request,
                                                          credentials)
                     LOG.info(f'Receive text from {from_username}/{group_username}, '
                              f'content: {content}')
                 else:
-                    LOG.info(f'Receive text from {from_username}, '
+                    LOG.info(f'Receive text from {from_username} '
+                             f'to: {to_username}, '
                              f'content: {content}')
                 try:
                     if not content.startswith('#ai '):
                         continue
 
                     # asyncronous reply
+                    me = session.user['UserName']
+                    to = from_userid if to_userid == me else to_userid
                     reply_fn = partial(self.send_message,
-                                    to=from_username,
-                                    uri=uri, request=request,
-                                    session=session,
-                                    credentials=credentials)
-                    asyncio.create_task(self.chatgpt_reply(content[4:], reply_fn))
+                                       to=to,
+                                       uri=uri, request=request,
+                                       session=session,
+                                       credentials=credentials)
+                    asyncio.create_task(
+                        self.chatgpt_reply(content[4:], reply_fn))
                 except Exception as err:
                     LOG.error(f'Chatgpt error: {err}')
             # image
@@ -482,7 +488,8 @@ class WechatClient:
         }
         resp = self._request('POST', url, body=params)
         decoded = json.loads(resp.content.decode('utf-8'))
-        return decoded['BaseResponse']['Ret'] == 0
+        sent = decoded['BaseResponse']['Ret'] == 0
+        LOG.info(f'Send message to {to}, content: {content}, sent: {sent}.')
 
     def _print_qrcode(self, value):
         qr = qrcode.QRCode()

@@ -6,7 +6,7 @@ RUN sed -i "s/archive.ubuntu.com/mirrors.aliyun.com/g" /etc/apt/sources.list /et
     rm -Rf /var/lib/apt/lists/* && \
     apt-get update
 
-RUN apt-get -y install wget python3 python3-pip
+RUN apt-get -y install wget python3 python3-pip xvfb
 
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub > /usr/share/keyrings/chrome.pub && \
     echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/chrome.pub] http://dl.google.com/linux/chrome/deb/ stable main' > /etc/apt/sources.list.d/google-chrome.list && \

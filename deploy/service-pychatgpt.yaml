@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pychatgpt
+  namespace: pychatgpt
+spec:
+  type: ClusterIP
+  ports:
+    - name: pychatgpt
+      port: 6666
+      targetPort: 6666
+      protocol: TCP
+  selector:
+    application: pychatgpt
+    component: pychatgpt

@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pychatgpt
+  namespace: pychatgpt
+  labels:
+    name: pychatgpt
+spec:
+  rules:
+    - host: pychatgpt.shoppon.club
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: pychatgpt
+                port:
+                  number: 6666
+    - host: pychatgpt.shoppon.local
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: pychatgpt
+                port:
+                  number: 6666
+    - http:
+        paths:
+          - pathType: Prefix
+            path: "/pychatgpt"
+            backend:
+              service:
+                name: pychatgpt
+                port:
+                  number: 6666

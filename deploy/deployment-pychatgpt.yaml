@@ -43,3 +43,4 @@ spec:
         - name: pychatgpt-bin
           configMap:
             name: pychatgpt-bin
+            defaultMode: 0550

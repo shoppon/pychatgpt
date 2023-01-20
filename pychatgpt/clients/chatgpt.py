@@ -167,7 +167,7 @@ class ChatgptClient:
             response = response.text.splitlines()[-4]
             response = response[6:]
         except Exception:
-            raise exception.BadResponse("Bad response from OpenAI!")
+            raise exception.BadResponse(f"Bad response: {response}!")
 
         # Check if it is JSON
         if not response.startswith("{"):

@@ -75,7 +75,8 @@ class WechatClient:
                                     data=content,
                                     cookies=cookies,
                                     headers=headers)
-        LOG.debug(f"Response: {resp.status_code}, {resp.text}")
+        LOG.info(f"Response code: {resp.status_code}.")
+        LOG.debug(f"Response content: {resp.text}.")
         if resp.status_code != 200:
             raise exception.BadResponse(f"Bad response: {resp.status_code}")
         return resp
@@ -422,7 +423,7 @@ class WechatClient:
                                     uri=uri, request=request,
                                     session=session,
                                     credentials=credentials)
-                    asyncio.create_task(self.chatgpt_reply(content, reply_fn))
+                    asyncio.create_task(self.chatgpt_reply(content[4:], reply_fn))
                 except Exception as err:
                     LOG.error(f'Chatgpt error: {err}')
             # image

@@ -318,6 +318,7 @@ class WechatClient:
 
     async def listen(self, uri: Uri, request: Request, session: Session,
                      credentials: Credential, contacts: Contacts):
+        start_time = time.time()
         failures = 0
         host = self.select_host(request, session)
         self.working = True
@@ -353,6 +354,12 @@ class WechatClient:
             except Exception as err:
                 LOG.exception(f'Listen error: {err}')
                 failures += 1
+                now = time.time()
+                # reset failures if period is over
+                if (now - start_time) > CONF.wechat.period:
+                    start_time = now
+                    failures = 0
+                # continue if failures is less than retries
                 if failures <= CONF.wechat.retries:
                     continue
             finally:

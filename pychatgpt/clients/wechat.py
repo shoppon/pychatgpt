@@ -329,28 +329,15 @@ class WechatClient:
 
             try:
                 retcode, selector = self.sync_check(host, request, session)
-                if retcode == '1100':
+                if retcode in ('1100', '1101', '1102'):
                     LOG.warning('Login out')
                     break
-                if retcode == '1101':
-                    LOG.warning('Login on other device')
-                    break
 
-                if retcode != '0':
-                    LOG.warning('Sync check error')
-                    continue
-
-                if selector == '2':
+                if selector in ('2', "7"):
                     resp = self.webwx_sync(uri, request, session, credentials)
                     if resp is not None:
                         self.handle_message(resp, contacts, uri, session,
                                             request, credentials)
-                elif selector == '6':
-                    LOG.warning('New device login')
-                    break
-                elif selector == '7':
-                    resp = self.webwx_sync(uri, request, session, credentials)
-
             except Exception as err:
                 LOG.exception(f'Listen error: {err}')
                 failures += 1

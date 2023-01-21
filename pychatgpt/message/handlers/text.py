@@ -46,7 +46,7 @@ class TextHandler(BaseHandler):
 
     async def chatgpt_reply(self, content, conv: Conversation):
         try:
-            msg = f'「{content}」<br/>- - - - - - - - - - - - - - -<br/>'
+            msg = f'「{content}」\n- - - - - - - - - - - - - - -\n'
             with bot.ensure_chatgpt() as chatgpt:
                 try:
                     reply = chatgpt.ask(content, conv.c_id, conv.p_id)

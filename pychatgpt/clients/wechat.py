@@ -330,7 +330,7 @@ class WechatClient:
             try:
                 retcode, selector = self.sync_check(host, request, session)
                 if retcode in ('1100', '1101', '1102'):
-                    LOG.warning('Login out')
+                    LOG.warning(f'Receive retcode: {retcode}, Login out')
                     break
 
                 if selector in ('2', "7"):
@@ -338,6 +338,8 @@ class WechatClient:
                     if resp is not None:
                         self.handle_message(resp, contacts, uri, session,
                                             request, credentials)
+                else:
+                    LOG.info(f'Receive selector: {selector}.')
             except Exception as err:
                 LOG.exception(f'Listen error: {err}')
                 failures += 1
@@ -350,7 +352,7 @@ class WechatClient:
                 if failures <= CONF.wechat.retries:
                     continue
             finally:
-                await asyncio.sleep(1)
+                await asyncio.sleep(CONF.wechat.sync_interval)
 
         LOG.info('Listen stopped.')
         self.working = False

@@ -64,3 +64,21 @@ class Contacts:
                 if member['UserName'] == userid:
                     return member['NickName']
         return userid
+
+
+@attr.s
+class Message:
+    msg_type = attr.ib(type=int)
+    content = attr.ib(type=str)
+    from_username = attr.ib(type=str)
+    from_userid = attr.ib(type=str)
+    to_username = attr.ib(type=str)
+    to_userid = attr.ib(type=str)
+    group_username = attr.ib(type=str, default=None)
+    group_userid = attr.ib(type=str, default=None)
+
+    def __str__(self):
+        return f'{self.from_username} -> {self.to_username}: {self.content}'
+
+    def __repr__(self):
+        return f'<Message: {self}>'

@@ -13,9 +13,11 @@ from oslo_log import log as logging
 
 from pychatgpt import exception
 from pychatgpt import utils
-from pychatgpt.api import bot
+from pychatgpt.message import handlers
+from pychatgpt.message.handlers import BaseHandler
 from pychatgpt.models.wechat import Contacts
 from pychatgpt.models.wechat import Credential
+from pychatgpt.models.wechat import Message
 from pychatgpt.models.wechat import Request
 from pychatgpt.models.wechat import Session
 from pychatgpt.models.wechat import Uri
@@ -347,8 +349,10 @@ class WechatClient:
 
                 await asyncio.sleep(1)
         except Exception as err:
-            self.working = False
             LOG.exception(f'Listen error: {err}')
+
+        LOG.info('Listen stopped.')
+        self.working = False
 
     def webwx_sync(self, uri: Uri, request: Request, session: Session,
                    credentials: Credential):
@@ -391,8 +395,14 @@ class WechatClient:
                        session: Session,
                        request: Request,
                        credentials: Credential):
+        reply_fn = partial(self.send_message,
+                           uri=uri, request=request,
+                           session=session,
+                           credentials=credentials)
+
         for msg in resp['AddMsgList']:
             msg_type = msg['MsgType']
+            content = msg['Content'].replace('&lt;', '<').replace('&gt;', '>')
 
             from_userid = msg['FromUserName']
             from_username = self.parse_username(from_userid, contacts,
@@ -401,78 +411,27 @@ class WechatClient:
             to_username = self.parse_username(to_userid, contacts,
                                               uri, request, credentials)
 
-            content = msg['Content'].replace('&lt;', '<').replace('&gt;', '>')
-
-            # text message
-            if msg_type == 1:
-                # group message
-                if content.startswith('@'):
-                    group_userid, content = content.split(':<br/>', 1)
-                    group_username = self.parse_username(group_userid,
-                                                         contacts, uri,
-                                                         request,
-                                                         credentials)
-                    LOG.info(f'Receive text from {from_username}/{group_username}, '
-                             f'content: {content}')
-                else:
-                    LOG.info(f'Receive text from {from_username} '
-                             f'to {to_username}, '
-                             f'content: {content}')
-                try:
-                    me = session.user['UserName']
-                    to = from_userid if to_userid == me else to_userid
-                    if content.startswith('#hc '):
-                        self.send_message(content[4:],
-                                          to=to,
-                                          uri=uri, request=request,
-                                          session=session,
-                                          credentials=credentials)
-                        continue
-
-                    if not content.startswith('#ai '):
-                        continue
-
-                    # asyncronous reply
-                    reply_fn = partial(self.send_message,
-                                       to=to,
-                                       uri=uri, request=request,
-                                       session=session,
-                                       credentials=credentials)
-                    asyncio.create_task(
-                        self.chatgpt_reply(content[4:], reply_fn))
-                except Exception as err:
-                    LOG.error(f'Chatgpt error: {err}')
-            # image
-            elif msg_type == 3:
-                LOG.info('Receive image')
-            # voice
-            elif msg_type == 34:
-                LOG.info('Receive voice')
-            # card
-            elif msg_type == 42:
-                LOG.info('Receive card')
-            # gif
-            elif msg_type == 47:
-                pass
-            # share
-            elif msg_type == 49:
-                pass
-            # contact
-            elif msg_type == 51:
-                pass
-            # video
-            elif msg_type == 62:
-                pass
-            elif msg_type == 10002:
-                pass
-
-    async def chatgpt_reply(self, content, callback: callable):
-        try:
-            with bot.ensure_chatgpt() as chatgpt:
-                reply = chatgpt.ask(content)
-                callback(reply['message'])
-        except Exception as err:
-            LOG.error(f'Chatgpt error: {err}')
+            group_userid = None
+            group_username = None
+            if content.startswith('@'):
+                group_userid, content = content.split(':<br/>', 1)
+                group_username = self.parse_username(group_userid,
+                                                     contacts, uri,
+                                                     request,
+                                                     credentials)
+            message = Message(msg_type=msg_type,
+                              content=content,
+                              from_userid=from_userid,
+                              from_username=from_username,
+                              to_userid=to_userid,
+                              to_username=to_username,
+                              group_userid=group_userid,
+                              group_username=group_username,
+                              )
+            handler: BaseHandler = handlers.find_handler(msg_type)
+            me = session.user['UserName']
+            if handler:
+                handler(me, reply_fn).handle(message)
 
     def send_message(self, content, to,
                      uri: Uri,

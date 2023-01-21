@@ -30,7 +30,7 @@ class TextHandler(BaseHandler):
                 return
 
             # asyncronous reply
-            asyncio.create_task(self.chatgpt_reply(msg.content[4:]), to)
+            asyncio.create_task(self.chatgpt_reply(msg.content[4:], to))
         except Exception as err:
             LOG.error(f'Chatgpt error: {err}')
 

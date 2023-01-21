@@ -9,6 +9,7 @@ from functools import partial
 from requests import Session as RequestsSession
 from requests import Response
 
+from oslo_config import cfg
 from oslo_log import log as logging
 
 from pychatgpt import exception
@@ -22,6 +23,7 @@ from pychatgpt.models.wechat import Request
 from pychatgpt.models.wechat import Session
 from pychatgpt.models.wechat import Uri
 
+CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -316,14 +318,15 @@ class WechatClient:
 
     async def listen(self, uri: Uri, request: Request, session: Session,
                      credentials: Credential, contacts: Contacts):
-        try:
-            host = self.select_host(request, session)
-            self.working = True
-            while True:
-                if self.should_stop:
-                    LOG.info('Stop listen.')
-                    break
+        failures = 0
+        host = self.select_host(request, session)
+        self.working = True
+        while True:
+            if self.should_stop:
+                LOG.info('Stop listen.')
+                break
 
+            try:
                 retcode, selector = self.sync_check(host, request, session)
                 if retcode == '1100':
                     LOG.warning('Login out')
@@ -347,9 +350,13 @@ class WechatClient:
                 elif selector == '7':
                     resp = self.webwx_sync(uri, request, session, credentials)
 
+            except Exception as err:
+                LOG.exception(f'Listen error: {err}')
+                failures += 1
+                if failures <= CONF.wechat.retries:
+                    continue
+            finally:
                 await asyncio.sleep(1)
-        except Exception as err:
-            LOG.exception(f'Listen error: {err}')
 
         LOG.info('Listen stopped.')
         self.working = False

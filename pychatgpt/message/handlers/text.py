@@ -4,12 +4,17 @@ from oslo_log import log as logging
 
 from pychatgpt.api import bot
 from pychatgpt.message.handlers.base import BaseHandler
+from pychatgpt.models.chatgpt import Conversation
 
 LOG = logging.getLogger(__name__)
 
 
 class TextHandler(BaseHandler):
     msg_type = 1
+
+    def __init__(self, me: str, reply_fn: callable) -> None:
+        super().__init__(me, reply_fn)
+        self.conversations = {}
 
     def handle(self, msg) -> None:
         if msg.group_userid:
@@ -29,15 +34,21 @@ class TextHandler(BaseHandler):
             if not msg.content.startswith('#ai '):
                 return
 
+            conv: Conversation = self.conversations.get(to)
+            if not conv:
+                conv = Conversation(c_id=None, p_id=None, to=to)
+                self.conversations[to] = conv
             # asyncronous reply
-            asyncio.create_task(self.chatgpt_reply(msg.content[4:], to))
+            asyncio.create_task(self.chatgpt_reply(msg.content[4:], conv))
         except Exception as err:
             LOG.error(f'Chatgpt error: {err}')
 
-    async def chatgpt_reply(self, content, to):
+    async def chatgpt_reply(self, content, conv: Conversation):
         try:
             with bot.ensure_chatgpt() as chatgpt:
-                reply = chatgpt.ask(content)
-                self.reply_fn(content=reply['message'], to=to)
+                reply = chatgpt.ask(content, conv.c_id, conv.p_id)
+                conv.c_id = reply['conversation_id']
+                conv.p_id = reply['parent_id']
+                self.reply_fn(content=reply['message'], to=conv.to)
         except Exception as err:
             LOG.error(f'Chatgpt error: {err}')

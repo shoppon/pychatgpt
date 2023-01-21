@@ -2,7 +2,7 @@ from oslo_config import cfg
 
 wechat_group = cfg.OptGroup('wechat', title='Wechat Options')
 wechat_opts = [
-    cfg.StrOpt('retries', default=5, help='Number of retries'),
+    cfg.IntOpt('retries', default=5, help='Number of retries'),
 ]
 
 

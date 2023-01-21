@@ -333,7 +333,7 @@ class WechatClient:
                     LOG.warning(f'Receive retcode: {retcode}, Login out')
                     break
 
-                if selector in ('2', "6", "7"):
+                if selector in ('2', "3", "4", "6", "7"):
                     resp = self.webwx_sync(uri, request, session, credentials)
                     if resp is not None:
                         self.handle_message(resp, contacts, uri, session,

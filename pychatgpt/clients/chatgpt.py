@@ -174,11 +174,11 @@ class ChatgptClient:
             raise exception.BadResponse(f"Unexpected response {response}!")
 
         response = json.loads(response)
-        parent_id = response["message"]["id"]
-        conversation_id = response["conversation_id"]
+        message_id = response["message"]["id"]
+        conv_id = response["conversation_id"]
         message = response["message"]["content"]["parts"][0]
         return {
             "message": message,
-            "conversation_id": conversation_id,
-            "parent_id": parent_id,
+            "conversation_id": conv_id,
+            "message_id": message_id,
         }

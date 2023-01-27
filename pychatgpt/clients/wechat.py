@@ -52,6 +52,7 @@ class WechatClient:
                  body: dict = None,  # json body
                  headers: dict = None,
                  cookies: dict = None,
+                 timeout: int = 10,
                  ) -> Response:
         headers = headers or {}
         headers['User-Agent'] = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
@@ -78,7 +79,8 @@ class WechatClient:
                                     params=params,
                                     data=content,
                                     cookies=cookies,
-                                    headers=headers)
+                                    headers=headers,
+                                    timeout=timeout)
         LOG.info(f"Response code: {resp.status_code}.")
         LOG.debug(f"Response content: {resp.text}.")
         if resp.status_code != 200:

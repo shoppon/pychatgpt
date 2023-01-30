@@ -1,4 +1,5 @@
 import asyncio
+import qrcode
 from contextlib import contextmanager
 
 from oslo_log import log as logging
@@ -24,6 +25,22 @@ def ensure_wechat():
         if wc is None:
             raise PyChatGPTException("Wechat client is not started.")
 
+async def login(wc: WechatClient, uuid: str):
+    uri = wc.wait_for_login(uuid, tip=0)
+    request, cred = wc.login(uri)
+    session = wc.webwx_init(uri, request, cred)
+    wc.webwx_status_notify(uri, request, session, cred)
+    contacts = wc.read_contacts(uri, request, cred)
+    wc.read_batch_contacts(contacts, uri, request, cred)
+    LOG.info("Creating task for wechat client.")
+    asyncio.create_task(wc.listen(uri, request, session, cred, contacts))
+
+def print_qrcode(value):
+    qr = qrcode.QRCode()
+    qr.border = 1
+    qr.add_data(value)
+    qr.make()
+    qr.print_ascii(invert=True)
 
 @app.get("/wechat/start")
 async def start():
@@ -33,18 +50,12 @@ async def start():
             return {}
 
         wc.should_stop = False
-
         LOG.info("Starting wechat client.")
         uuid = wc.get_login_uuid()
-        uri = wc.wait_for_login(uuid, tip=0)
-        request, cred = wc.login(uri)
-        session = wc.webwx_init(uri, request, cred)
-        wc.webwx_status_notify(uri, request, session, cred)
-        contacts = wc.read_contacts(uri, request, cred)
-        wc.read_batch_contacts(contacts, uri, request, cred)
-        LOG.info("Creating task for wechat client.")
-        asyncio.create_task(wc.listen(uri, request, session, cred, contacts))
-        return {}
+        login_url = f'https://login.weixin.qq.com/l/{uuid}'
+        print_qrcode(login_url)
+        asyncio.create_task(login(wc, uuid))
+        return {'url': login_url}
 
 
 @app.get("/wechat/stop")

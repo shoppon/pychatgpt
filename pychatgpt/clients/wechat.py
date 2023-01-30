@@ -1,6 +1,5 @@
 import asyncio
 import json
-import qrcode
 import random
 import re
 import time
@@ -8,6 +7,7 @@ import xml
 from functools import partial
 from requests import Session as RequestsSession
 from requests import Response
+from requests.exceptions import RequestException
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -45,7 +45,7 @@ class WechatClient:
         self.session.close()
         return False
 
-    @utils.retry(exception.BadResponse, retries=3)
+    @utils.retry((exception.BadResponse, RequestException), retries=3)
     def _request(self, method: str, url: str,
                  params: dict = None,  # query string
                  form: dict = None,  # form data
@@ -110,10 +110,9 @@ class WechatClient:
             raise exception.BadResponse(f"Bad response: {code}")
 
         uuid = pm.group(2)
-        self._print_qrcode(f'https://login.weixin.qq.com/l/{uuid}')
         return uuid
 
-    @utils.retry(exception.BadResponse, retries=5)
+    @utils.retry(exception.BadResponse, retries=10)
     def wait_for_login(self, uuid, tip=1):
         LOG.info(f"Waiting for login, uuid: {uuid}, tip: {tip}")
         now = int(time.time())
@@ -122,6 +121,7 @@ class WechatClient:
         resp = self._request('GET', url).text
         match_obj = re.search(r"window.code=(\d+);", resp)
         code = match_obj.group(1)
+        LOG.info(f"Login code: {code}.")
 
         if code != '200':
             raise exception.BadResponse(f"Bad response: {code}")
@@ -463,13 +463,6 @@ class WechatClient:
         decoded = json.loads(resp.content.decode('utf-8'))
         sent = decoded['BaseResponse']['Ret'] == 0
         LOG.info(f'Send message to {to}, content: {content}, sent: {sent}.')
-
-    def _print_qrcode(self, value):
-        qr = qrcode.QRCode()
-        qr.border = 1
-        qr.add_data(value)
-        qr.make()
-        qr.print_ascii(invert=True)
 
     def stop(self):
         self.should_stop = True

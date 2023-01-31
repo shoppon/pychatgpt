@@ -17,7 +17,10 @@ LOG = logging.getLogger(__name__)
 def main():
     CONF(sys.argv[1:], project='chatgpt')
 
-    uvicorn.run(app, host="0.0.0.0", port=6666, log_level="info")
+    host = "0.0.0.0"
+    port = 6666
+    LOG.info(f"Server started at {host}:{port}.")
+    uvicorn.run(app, host=host, port=port, log_level="info")
     LOG.info("Server exited.")
 
 

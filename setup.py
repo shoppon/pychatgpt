@@ -14,7 +14,7 @@ setup(
     long_description_content_type="text/markdown",
     entry_points={
         "console_scripts": [
-            "pychatgpt-api = cmds.api:main",
+            "pychatgpt-api = pychatgpt.cmds.api:main",
         ]
     },
 )

@@ -18,6 +18,6 @@ COPY requirements.txt /opt/pychatgpt/requirements.txt
 RUN pip install -r /opt/pychatgpt/requirements.txt
 
 COPY . /opt/pychatgpt/
-RUN cd /opt/pychatgpt/ && python3 setup.py install
+RUN cd /opt/pychatgpt/ && python3 setup.py install --old-and-unmanageable
 
-CMD xvfb-run --server-args="-screen 0 1280x800x24 -ac -nolisten tcp -dpi 96 +extension RANDR"
+CMD ["/bin/bash"]

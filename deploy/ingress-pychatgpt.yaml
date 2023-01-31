@@ -5,6 +5,10 @@ metadata:
   namespace: pychatgpt
   labels:
     name: pychatgpt
+  annotations:
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      rewrite ^/pychatgpt/(.*) /$1 break;
+    ningx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
     - host: pychatgpt.shoppon.club
@@ -30,7 +34,7 @@ spec:
     - http:
         paths:
           - pathType: Prefix
-            path: "/pychatgpt"
+            path: /pychatgpt
             backend:
               service:
                 name: pychatgpt

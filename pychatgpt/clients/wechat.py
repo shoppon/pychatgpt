@@ -112,7 +112,7 @@ class WechatClient:
         uuid = pm.group(2)
         return uuid
 
-    @utils.retry(exception.BadResponse, retries=10)
+    @utils.retry(exception.BadResponse, retries=5)
     def wait_for_login(self, uuid, tip=1):
         LOG.info(f"Waiting for login, uuid: {uuid}, tip: {tip}")
         now = int(time.time())

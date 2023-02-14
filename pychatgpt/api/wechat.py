@@ -25,6 +25,7 @@ def ensure_wechat():
         if wc is None:
             raise PyChatGPTException("Wechat client is not started.")
 
+
 async def login(wc: WechatClient, uuid: str):
     uri = wc.wait_for_login(uuid, tip=0)
     request, cred = wc.login(uri)
@@ -35,12 +36,14 @@ async def login(wc: WechatClient, uuid: str):
     LOG.info("Creating task for wechat client.")
     asyncio.create_task(wc.listen(uri, request, session, cred, contacts))
 
+
 def print_qrcode(value):
     qr = qrcode.QRCode()
     qr.border = 1
     qr.add_data(value)
     qr.make()
     qr.print_ascii(invert=True)
+
 
 @app.get("/wechat/start")
 async def start():

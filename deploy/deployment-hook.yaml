@@ -35,7 +35,7 @@ spec:
               readOnly: true
             - name: pychatgpt-bin
               mountPath: /usr/bin/start_hook.sh
-              subPath: start.sh
+              subPath: start_hook.sh
       volumes:
         - name: pychatgpt-etc
           configMap:

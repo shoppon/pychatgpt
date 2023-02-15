@@ -15,7 +15,7 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub > /usr/sh
 
 # for quicker build
 COPY requirements.txt /opt/pychatgpt/requirements.txt
-RUN pip install -r /opt/pychatgpt/requirements.txt
+RUN pip install -r /opt/pychatgpt/requirements.txt -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 
 COPY . /opt/pychatgpt/
 RUN cd /opt/pychatgpt/ && python3 setup.py install --old-and-unmanageable

@@ -76,6 +76,10 @@ class Hook:
         ws.run_forever()
 
 
-if __name__ == "__main__":
+def main():
     hook = Hook()
     hook.start()
+
+
+if __name__ == "__main__":
+    main()

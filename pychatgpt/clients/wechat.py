@@ -16,12 +16,12 @@ from pychatgpt import exception
 from pychatgpt import utils
 from pychatgpt.message import handlers
 from pychatgpt.message.handlers import BaseHandler
-from pychatgpt.models.wechat import Contacts
-from pychatgpt.models.wechat import Credential
-from pychatgpt.models.wechat import Message
-from pychatgpt.models.wechat import Request
-from pychatgpt.models.wechat import Session
-from pychatgpt.models.wechat import Uri
+from pychatgpt.models.webwx import Contacts
+from pychatgpt.models.webwx import Credential
+from pychatgpt.models.webwx import Message
+from pychatgpt.models.webwx import Request
+from pychatgpt.models.webwx import Session
+from pychatgpt.models.webwx import Uri
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
@@ -433,7 +433,7 @@ class WechatClient:
                               group_userid=group_userid,
                               group_username=group_username,
                               )
-            handler: BaseHandler = handlers.find_handler(msg_type)
+            handler: BaseHandler = handlers.find_handler(msg_type, 'webwx')
             me = session.user['UserName']
             if handler:
                 handler(me, reply_fn).handle(message)

@@ -4,10 +4,17 @@ metadata:
   name: pychatgpt-bin
   namespace: pychatgpt
 data:
-  start.sh: |+
+  start_api.sh: |+
     #! /bin/bash
     set -ex
     export DISPLAY=:1
     Xvfb $DISPLAY -screen $DISPLAY 1280x1024x16 &
 
     pychatgpt-api --config-file /etc/pychatgpt/pychatgpt.conf
+  start_hook.sh: |+
+    #! /bin/bash
+    set -ex
+    export DISPLAY=:1
+    Xvfb $DISPLAY -screen $DISPLAY 1280x1024x16 &
+
+    pychatgpt-hook --config-file /etc/pychatgpt/pychatgpt.conf

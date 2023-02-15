@@ -15,3 +15,6 @@ data:
     [chrome]
     driver_exec_path =
     browser_exec_path =
+
+    [hook]
+    url = ws://192.168.5.136:5555

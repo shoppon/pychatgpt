@@ -15,6 +15,7 @@ setup(
     entry_points={
         "console_scripts": [
             "pychatgpt-api = pychatgpt.cmds.api:main",
+            "pychatgpt-hook = pychatgpt.cmds.hook:main",
         ]
     },
 )

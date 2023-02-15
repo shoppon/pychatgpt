@@ -14,9 +14,10 @@ CONVERSATIONS = {}
 
 class TextHandler(BaseHandler):
     msg_type = 1
+    wx_type = 'webwx'
 
     def __init__(self, me: str, reply_fn: callable) -> None:
-        super().__init__(me, reply_fn)
+        super().__init__(me, reply_fn)         
 
     def handle(self, msg) -> None:
         if msg.group_userid:

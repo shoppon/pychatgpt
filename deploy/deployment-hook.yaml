@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pychatgpt
+  name: hook
   namespace: pychatgpt
 spec:
   selector:
     matchLabels:
       application: pychatgpt
-      component: pychatgpt
+      component: hook
   template:
     metadata:
       labels:
         application: pychatgpt
-        component: pychatgpt
+        component: hook
     spec:
       containers:
         - image: shoppon/pychatgpt:latest
           name: pychatgpt
           # command: ["/bin/bash", "-c", "--"]
           # args: ["while true; do sleep 30; done;"]
-          command: ["/usr/bin/start.sh"]
+          command: ["/usr/bin/start_hook.sh"]
           imagePullPolicy: IfNotPresent
           resources:
             limits:
@@ -34,7 +34,7 @@ spec:
               subPath: pychatgpt.conf
               readOnly: true
             - name: pychatgpt-bin
-              mountPath: /usr/bin/start.sh
+              mountPath: /usr/bin/start_hook.sh
               subPath: start.sh
       volumes:
         - name: pychatgpt-etc

@@ -1,8 +1,9 @@
-from pychatgpt.models.wechat import Message
+from pychatgpt.models.webwx import Message
 
 
 class BaseHandler:
     msg_type = None
+    wx_type = None
 
     def __init__(self, me:str, reply_fn: callable,) -> None:
         self.me = me

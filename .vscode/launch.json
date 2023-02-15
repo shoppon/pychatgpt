@@ -15,6 +15,18 @@
         "--config-file",
         "${workspaceFolder}/etc/pychatgpt.conf",
       ]
-    }
+    },
+    {
+        "name": "wechat hook",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/pychatgpt/cmds/hook.py",
+        "console": "integratedTerminal",
+        "justMyCode": false,
+        "args": [
+          "--config-file",
+          "${workspaceFolder}/etc/pychatgpt.conf",
+        ]
+      }
   ]
 }

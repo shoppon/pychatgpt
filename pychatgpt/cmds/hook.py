@@ -1,6 +1,7 @@
 import json
 import websocket
 import pytz
+import sys
 from datetime import datetime
 from oslo_log import log as logging
 
@@ -77,6 +78,7 @@ class Hook:
 
 
 def main():
+    CONF(sys.argv[1:], project='chatgpt')
     hook = Hook()
     hook.start()
 

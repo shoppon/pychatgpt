@@ -12,7 +12,7 @@ class ContactHandler(BaseHandler):
     msg_type = 5000
     wx_type = 'winwx'
 
-    def handle(self, msg) -> None:
+    async def handle(self, msg) -> None:
         LOG.info(f'Hanlding contact message: {msg}')
         for c in msg['content']:
             contact = Contact(**c)

@@ -20,12 +20,12 @@ class TextHandler(BaseHandler):
     def __init__(self, me: str, reply_fn: callable) -> None:
         super().__init__(me, reply_fn)
 
-    def handle(self, msg: dict) -> None:
+    async def handle(self, msg: dict) -> None:
         msg = Message(**msg)
         try:
             to = msg.wxid
             if msg.content.startswith('#hc'):
-                self.reply_fn(content=msg.content[3:].strip(), to=to)
+                await self.reply_fn(content=msg.content[3:].strip(), to=to)
 
             if not msg.content.startswith('#ai'):
                 return
@@ -51,12 +51,12 @@ class TextHandler(BaseHandler):
                 except Exception as err:
                     LOG.error(f'Chatgpt error: {err}')
                     msg += 'An error occurred, please try again later.'
-                    self.reply_fn(content=msg, to=conv.to)
+                    await self.reply_fn(content=msg, to=conv.to)
                 else:
                     LOG.info(f'Chatgpt reply: {reply}.')
                     conv.c_id = reply['conversation_id']
                     conv.p_id = reply['message_id']
                     msg += reply['message']
-                    self.reply_fn(msg, to=conv.to)
+                    await self.reply_fn(msg, to=conv.to)
         except Exception as err:
             LOG.error(f'Chatgpt error: {err}')

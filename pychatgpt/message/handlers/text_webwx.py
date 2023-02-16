@@ -17,9 +17,9 @@ class TextHandler(BaseHandler):
     wx_type = 'webwx'
 
     def __init__(self, me: str, reply_fn: callable) -> None:
-        super().__init__(me, reply_fn)         
+        super().__init__(me, reply_fn)
 
-    def handle(self, msg) -> None:
+    async def handle(self, msg) -> None:
         if msg.group_userid:
             LOG.info(f'Receive text from {msg.from_username}/'
                      f'{msg.group_username}, '

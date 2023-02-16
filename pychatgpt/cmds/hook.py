@@ -1,5 +1,6 @@
+import asyncio
 import json
-import websocket
+import websockets
 import pytz
 import sys
 from datetime import datetime
@@ -20,7 +21,7 @@ class Hook:
         self.ws = None
         self.me = None
 
-    def on_message(self, ws, message):
+    async def on_message(self, message):
         LOG.info(message)
         msg = json.loads(message)
         msg_type = msg['type']
@@ -28,11 +29,11 @@ class Hook:
         if not handler:
             LOG.warning(f"Unknown message type: {msg_type}")
             return
-        handler(self.me, self.reply_fn).handle(msg)
+        await handler(self.me, self.reply_fn).handle(msg)
 
-    def reply_fn(self, content, to):
+    async def reply_fn(self, content, to):
         LOG.info(f'Replying to {to}: {content}')
-        self.ws.send(json.dumps({
+        await self.ws.send(json.dumps({
             'id': self.now(),
             'type': 555,
             'roomid': 'null',
@@ -43,22 +44,16 @@ class Hook:
         }))
         LOG.info(f'Replied to {to}.')
 
-    def on_error(self, ws, error):
-        LOG.error(error)
-
-    def on_close(self, ws):
-        LOG.info("### closed ###")
-
     def now(self):
         utc = datetime.utcnow()
         tz = pytz.timezone('Asia/Shanghai')
         now = utc.replace(tzinfo=pytz.utc).astimezone(tz)
         return now.strftime('%Y%m%d%H%M%S')
 
-    def on_open(self, ws):
+    async def on_open(self, ws):
         LOG.info("### opened ###")
         self.ws = ws
-        ws.send(json.dumps({
+        await ws.send(json.dumps({
             'id': self.now(),
             'type': 5000,
             'roomid': 'null',
@@ -68,19 +63,19 @@ class Hook:
             'ext': 'null'
         }))
 
-    def start(self):
-        ws = websocket.WebSocketApp(CONF.hook.url,
-                                    on_open=self.on_open,
-                                    on_close=self.on_close,
-                                    on_error=self.on_error,
-                                    on_message=self.on_message)
-        ws.run_forever()
+    async def listen(self):
+        async with websockets.connect(CONF.hook.url) as websocket:
+            self.ws = websocket
+            await self.on_open(websocket)
+            while True:
+                message = await websocket.recv()
+                await self.on_message(message)
 
 
 def main():
     CONF(sys.argv[1:], project='chatgpt')
     hook = Hook()
-    hook.start()
+    asyncio.get_event_loop().run_until_complete(hook.listen())
 
 
 if __name__ == "__main__":

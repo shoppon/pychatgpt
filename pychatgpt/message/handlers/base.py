@@ -9,5 +9,5 @@ class BaseHandler:
         self.me = me
         self.reply_fn = reply_fn
 
-    def handle(self, msg: Message) -> None:
+    async def handle(self, msg: Message) -> None:
         raise NotImplementedError

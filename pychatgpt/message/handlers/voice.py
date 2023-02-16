@@ -8,5 +8,5 @@ LOG = logging.getLogger(__name__)
 class VoiceHandler(BaseHandler):
     msg_type = 34
 
-    def handle(self, msg) -> None:
+    async def handle(self, msg) -> None:
         LOG.info(f'Receive voice from {msg.from_username}.')

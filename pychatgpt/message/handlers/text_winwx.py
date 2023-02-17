@@ -59,4 +59,7 @@ class TextHandler(BaseHandler):
                     msg += reply['message']
                     await self.reply_fn(msg, to=conv.to)
         except Exception as err:
+            await self.reply_fn(content=(f'{msg}Failed to start AI, '
+                                         'please try again later.'),
+                                to=conv.to)
             LOG.error(f'Chatgpt error: {err}')

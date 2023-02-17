@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "chatgpt api",
+      "name": "api",
       "type": "python",
       "request": "launch",
       "program": "${workspaceFolder}/pychatgpt/cmds/api.py",
@@ -17,6 +17,18 @@
       ]
     },
     {
+        "name": "chatgpt",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/pychatgpt/cmds/chatgpt.py",
+        "console": "integratedTerminal",
+        "justMyCode": false,
+        "args": [
+          "--config-file",
+          "${workspaceFolder}/etc/pychatgpt.conf",
+        ]
+      },
+    {
         "name": "wechat hook",
         "type": "python",
         "request": "launch",
@@ -25,7 +37,7 @@
         "justMyCode": false,
         "args": [
           "--config-file",
-          "${workspaceFolder}/etc/pychatgpt.conf",
+          "/etc/pychatgpt/pychatgpt.conf",
         ]
       }
   ]

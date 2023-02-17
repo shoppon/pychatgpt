@@ -1,11 +1,12 @@
 fastapi
-qrcode
 oslo.config
 oslo.log
+pyvirtualdisplay
+qrcode
 requests
-selenium>=4.7.2
+selenium==4.7.2
 tenacity
-tls_client>=0.1.7
-undetected_chromedriver>=3.1.7
+tls_client==0.1.7
+undetected_chromedriver==3.1.7
 uvicorn
 websockets

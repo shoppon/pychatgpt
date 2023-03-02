@@ -14,7 +14,8 @@ CC = None
 
 
 def start_chatgpt():
-    return openai.OpenAIClient(CONF.openai.api_key)
+    return openai.OpenAIClient(CONF.openai.api_key,
+                               proxy=CONF.tls_client.http_proxy)
 
 
 @contextmanager

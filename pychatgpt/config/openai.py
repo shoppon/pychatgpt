@@ -1,6 +1,6 @@
 from oslo_config import cfg
 
-openai_group = cfg.OptGroup('hook', title='Hook Options')
+openai_group = cfg.OptGroup('openai', title='OpenAI Options')
 openai_opts = [
     cfg.StrOpt('api_key', help='OpenAI API key'),
 ]
@@ -8,4 +8,4 @@ openai_opts = [
 
 def register_opts(conf):
     conf.register_group(openai_group)
-    conf.register_opts(openai_opts, group='hook')
+    conf.register_opts(openai_opts, group='openai')

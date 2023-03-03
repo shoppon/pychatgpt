@@ -1,5 +1,5 @@
-import attr
 import random
+import attr
 
 
 DEVICE_ID = 'e' + repr(random.random())[2:17]

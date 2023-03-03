@@ -37,7 +37,7 @@ class TextHandler(BaseHandler):
             conv: Conversation = CONVERSATIONS.get(to)
             if conv is None:
                 LOG.info(f'Creating new conversation for {to}.')
-                conv = Conversation(c_id=None, p_id=None, to=to)
+                conv = Conversation(to=to)
                 CONVERSATIONS[to] = conv
             # asyncronous reply
             LOG.info(f'Invoking chatgpt with conversation: {conv}.')
@@ -48,19 +48,17 @@ class TextHandler(BaseHandler):
 
     async def chatgpt_reply(self, content, conv: Conversation):
         try:
-            msg = f'「{content}」\n- - - - - - - - - - - - - - -\n'
+            msg = f'「{content}」\n- - - - - - - - - - - - - - - - - - -\n'
             with bot.ensure_chatgpt() as chatgpt:
                 try:
-                    reply = chatgpt.ask(content, conv.c_id, conv.p_id)
+                    reply = chatgpt.ask(content, conv)
                 except Exception as err:
                     LOG.error(f'Chatgpt error: {err}')
                     msg += 'An error occurred, please try again later.'
                     self.reply_fn(content=msg, to=conv.to)
                 else:
                     LOG.info(f'Chatgpt reply: {reply}.')
-                    conv.c_id = reply['conversation_id']
-                    conv.p_id = reply['message_id']
-                    msg += reply['message']
+                    msg += reply
                     self.reply_fn(msg, to=conv.to)
         except Exception as err:
             LOG.error(f'Chatgpt error: {err}')

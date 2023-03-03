@@ -1,9 +1,10 @@
 import asyncio
 import json
-import websockets
-import pytz
 import sys
 from datetime import datetime
+
+import websockets
+import pytz
 from oslo_log import log as logging
 
 from pychatgpt import config  # noqa

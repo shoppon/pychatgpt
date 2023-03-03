@@ -2,6 +2,8 @@
 """
 import openai
 
+from pychatgpt.models.chatgpt import Conversation
+
 
 class OpenAIClient:
     """A client for OpenAI
@@ -11,17 +13,13 @@ class OpenAIClient:
         openai.api_key = api_key
         openai.proxy = proxy
 
-    def ask(self, prompt: str, conversation_id=None, parent_id=None) -> str:
+    def ask(self, prompt: str, conversation: Conversation) -> str:
         """Ask a question
         """
         completion = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=[
+            messages=conversation.messages + [
                 {"role": "user", "content": prompt}
             ]
         )
-        return {
-            "message": completion.choices[0].message.content.strip(),
-            "conversation_id": conversation_id,
-            "message_id": parent_id,
-        }
+        return completion.choices[0].message.content.strip()

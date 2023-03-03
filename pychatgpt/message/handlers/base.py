@@ -5,7 +5,7 @@ class BaseHandler:
     msg_type = None
     wx_type = None
 
-    def __init__(self, me:str, reply_fn: callable,) -> None:
+    def __init__(self, me: str, reply_fn: callable,) -> None:
         self.me = me
         self.reply_fn = reply_fn
 

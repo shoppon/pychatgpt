@@ -20,4 +20,6 @@ RUN pip install -r /opt/pychatgpt/requirements.txt -i http://mirrors.aliyun.com/
 COPY . /opt/pychatgpt/
 RUN cd /opt/pychatgpt/ && python3 setup.py install --old-and-unmanageable
 
+RUN sed -i '82i \    s.verify=False' /usr/local/lib/python3.8/dist-packages/openai/api_requestor.py
+
 CMD ["/bin/bash"]

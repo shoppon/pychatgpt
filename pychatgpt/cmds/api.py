@@ -5,8 +5,6 @@ from oslo_log import log as logging
 
 from pychatgpt import config  # noqa
 from pychatgpt.api import app
-from pychatgpt.api import bot  # noqa
-from pychatgpt.api import wechat  # noqa
 
 CONF = config.CONF
 logging.register_options(CONF)

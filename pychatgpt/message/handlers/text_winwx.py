@@ -2,10 +2,10 @@ import asyncio
 
 from oslo_log import log as logging
 
-from pychatgpt.api import bot
 from pychatgpt.message.handlers.base import BaseHandler
 from pychatgpt.models.chatgpt import Conversation
 from pychatgpt.models.winwx import Message
+from pychatgpt.wechat import bot
 
 LOG = logging.getLogger(__name__)
 
@@ -16,9 +16,6 @@ CONVERSATIONS = {}
 class TextHandler(BaseHandler):
     msg_type = 1
     wx_type = 'winwx'
-
-    def __init__(self, me: str, reply_fn: callable) -> None:
-        super().__init__(me, reply_fn)
 
     async def handle(self, msg: dict) -> None:
         msg = Message(**msg)

@@ -43,3 +43,15 @@ kubectl apply -f deploy/deployment-hook.yaml
 3. run `python setup.py install` to install pychatgpt.
 4. fill in hook.url and openai.api_key in `/etc/pychatgpt/pychatgpt.conf`.
 5. run `pychatgpt-hook --config-file /etc/pychatgpt/pychatgpt.conf` to start.
+
+# usage
+pychatgpt use group or contacts as the conversation unit.
+
+## clear conversation
+input `#ai clear` to clear a conversation context.
+
+## stop conversation
+input `#ai stop` to disable a conversation.
+
+## start conversation
+input `#ai start` to enable a conversation.

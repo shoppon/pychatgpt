@@ -36,3 +36,10 @@ kubectl apply -f deploy/deployment-hook.yaml
 2. fill in hook.url and openai.api_key in `/etc/pychatgpt/pychatgpt.conf`.
 3. open running/debug pannel.
 4. click `wechat hook` to run.
+
+## command line
+1. install python 3.8 or later.
+2. run `pip install -r requirments.txt` to install dependencies.
+3. run `python setup.py install` to install pychatgpt.
+4. fill in hook.url and openai.api_key in `/etc/pychatgpt/pychatgpt.conf`.
+5. run `pychatgpt-hook --config-file /etc/pychatgpt/pychatgpt.conf` to start.

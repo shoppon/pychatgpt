@@ -3,8 +3,8 @@ python client for chatgpt
 
 # environment
 1. install windows wechat 3.6.18.0.
-2. download wechat-bot from [here](https://github.com/cixingguangming55555/wechat-bot/tree/5.1.8.00).
-3. login windows wechat.
+2. login windows wechat.
+3. download wechat-bot from [here](https://github.com/cixingguangming55555/wechat-bot/tree/5.1.8.00).
 4. double click `wechat-bot-5.1.8.00\wechat-bot-5.1.8.00\server\funtool_3.6.0.18-1.0.0013非注入版.exe` to run wechat-bot server.
 
 # build

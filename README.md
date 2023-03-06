@@ -1,7 +1,7 @@
-# pychatgpt
-python client for chatgpt
+# description
+a wechat bot for conversation with openai gpt-3.5
 
-# environment
+# requirements
 1. install windows wechat 3.6.18.0.
 2. login windows wechat.
 3. download wechat-bot from [here](https://github.com/cixingguangming55555/wechat-bot/tree/5.1.8.00).
@@ -13,13 +13,18 @@ using docker to build cri image
 docker build -t shoppon/pychatgpt .
 ```
 
+# configuration
+the template of configuration file is `etc/pychatgpt.conf`.
+
+| key | group| description | default |
+| --- | --- | --- | --- |
+| url | hook | hook url | ws://127.0.0.1:5555 |
+| prefix | wechat | prefix for wechat message | #ai |
+| api_key | openai | openai api key | |
+| http_proxy | tls_client | http proxy for tls client | http://127.0.0.1:7890 |
+
 # run
 ## kubernetes
-### configure
-1. fill in hook.url and openai.api_key in the `deploy/configmap-etc.yaml`
-2. [optional] fill in tls_client.http_proxy in the `deploy/configmap-etc.yaml`
-
-### deploy
 deploy hook on kubernetes cluster
 ```
 kubectl create ns pychatgpt

@@ -1,5 +1,6 @@
 import asyncio
 
+from oslo_config import cfg
 from oslo_log import log as logging
 
 from pychatgpt.message.handlers.base import BaseHandler
@@ -7,6 +8,7 @@ from pychatgpt.models.chatgpt import Conversation
 from pychatgpt.models.winwx import Message
 from pychatgpt.wechat import bot
 
+CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
 # TODO(xp): use a better way to store conversation
@@ -27,7 +29,7 @@ class TextHandler(BaseHandler):
                                     to=to_user)
                 return
 
-            if not msg.content.startswith('#ai'):
+            if not msg.content.startswith(CONF.wechat.prefix):
                 return
 
             conv: Conversation = CONVERSATIONS.get(to_user)
@@ -36,7 +38,7 @@ class TextHandler(BaseHandler):
                 conv = Conversation(to=to_user)
                 CONVERSATIONS[to_user] = conv
 
-            keyword = msg.content[3:].strip()
+            keyword = msg.content[len(CONF.wechat.prefix):].strip()
             keyword_handle_fn = getattr(self, f'handle_{keyword}', None)
             if callable(keyword_handle_fn):
                 keyword_handle_fn(conv, from_user)

@@ -3,6 +3,7 @@ from oslo_config import cfg
 openai_group = cfg.OptGroup('openai', title='OpenAI Options')
 openai_opts = [
     cfg.StrOpt('api_key', help='OpenAI API key'),
+    cfg.IntOpt('timeout', default=60, help='Timeout for OpenAI requests'),
 ]
 
 

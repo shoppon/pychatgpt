@@ -7,7 +7,7 @@ a wechat bot for conversation with openai gpt-3.5
 3. download wechat-bot from [here](https://github.com/cixingguangming55555/wechat-bot/tree/5.1.8.00).
 4. double click `wechat-bot-5.1.8.00\wechat-bot-5.1.8.00\server\funtool_3.6.0.18-1.0.0013非注入版.exe` to run wechat-bot server.
 
-# build
+# build(optional when using docker or kubernetes)
 using docker to build cri image
 ```
 docker build -t shoppon/pychatgpt .
@@ -21,6 +21,7 @@ the template of configuration file is `etc/pychatgpt.conf`.
 | url | hook | hook url | ws://127.0.0.1:5555 |
 | prefix | wechat | prefix for wechat message | #ai |
 | api_key | openai | openai api key | |
+| timeout | openai | openai api timeout | 60 |
 | http_proxy | tls_client | http proxy for tls client | http://127.0.0.1:7890 |
 
 # run
@@ -34,7 +35,7 @@ kubectl apply -f deploy/deployment-hook.yaml
 ```
 
 ## docker
-
+TBD
 
 ## vscode
 1. copy `pychatgpt.conf` to `/etc/pychatgpt/pychatgpt.conf`.
@@ -46,8 +47,7 @@ kubectl apply -f deploy/deployment-hook.yaml
 1. install python 3.8 or later.
 2. run `pip install -r requirments.txt` to install dependencies.
 3. run `python setup.py install` to install pychatgpt.
-4. fill in hook.url and openai.api_key in `/etc/pychatgpt/pychatgpt.conf`.
-5. run `pychatgpt-hook --config-file /etc/pychatgpt/pychatgpt.conf` to start.
+4. run `pychatgpt-hook --config-file /etc/pychatgpt/pychatgpt.conf` to start.
 
 # usage
 pychatgpt use group or contacts as the conversation unit.

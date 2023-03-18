@@ -2,12 +2,14 @@ from oslo_log import log as logging
 
 from pychatgpt import utils
 from pychatgpt.message.handlers.base import BaseHandler
-from pychatgpt.message.handlers.contact import ContactHandler
-from pychatgpt.message.handlers.image import ImageHandler
-from pychatgpt.message.handlers.text_webwx import TextHandler
-from pychatgpt.message.handlers.text_winwx import TextHandler as WinwxTextHandler
-from pychatgpt.message.handlers.video import VideoHandler
-from pychatgpt.message.handlers.voice import VoiceHandler
+from pychatgpt.message.handlers.at_text import AtTextHandler  # noqa
+from pychatgpt.message.handlers.contact import ContactHandler  # noqa
+from pychatgpt.message.handlers.heartbeat import HeartbeatHandler  # noqa
+from pychatgpt.message.handlers.image import ImageHandler  # noqa
+from pychatgpt.message.handlers.text_webwx import TextHandler  # noqa
+from pychatgpt.message.handlers.text_winwx import TextHandler as WinwxTextHandler  # noqa
+from pychatgpt.message.handlers.video import VideoHandler  # noqa
+from pychatgpt.message.handlers.voice import VoiceHandler  # noqa
 
 LOG = logging.getLogger(__name__)
 

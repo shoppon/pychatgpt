@@ -4,10 +4,12 @@ from pychatgpt.message.handlers.base import BaseHandler
 
 LOG = logging.getLogger(__name__)
 
+CONTACTS = {}
 
-class ImageHandler(BaseHandler):
-    msg_type = 3
+
+class HeartbeatHandler(BaseHandler):
+    msg_type = 5005
     wx_type = 'winwx'
 
     async def handle(self, msg) -> None:
-        LOG.info(f'Receive image from {msg}.')
+        LOG.info(f'Receive heartbeat message: {msg}.')

@@ -1,0 +1,12 @@
+[Unit]
+Description=PyChatGPT Hook Service
+
+[Service]
+User=root
+Group=root
+ExecStart=pychatgpt-hook --config-file /etc/pychatgpt/pychatgpt.conf
+ExecStop=ps -ef|grep pychatgpt-hook|grep -v grep|awk '{print $2}'|xargs kill -9
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

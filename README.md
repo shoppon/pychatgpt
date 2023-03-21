@@ -45,9 +45,15 @@ TBD
 
 ## command line
 1. install python 3.8 or later.
-2. run `pip install -r requirments.txt` to install dependencies.
+2. run `pip install -r requirements.txt` to install dependencies.
 3. run `python setup.py install` to install pychatgpt.
 4. run `pychatgpt-hook --config-file /etc/pychatgpt/pychatgpt.conf` to start.
+
+## systemd
+1. copy `bin/pychatgpt-hook.service` to `/etc/systemd/system/pychatgpt-hook.service`.
+2. run `systemctl daemon-reload` to reload systemd.
+3. run `systemctl enable pychatgpt-hook` to enable pychatgpt-hook.
+4. run `systemctl start pychatgpt-hook` to start pychatgpt-hook.
 
 # usage
 pychatgpt use group or contacts as the conversation unit.
